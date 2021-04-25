@@ -113,5 +113,45 @@ def get_al_2_robot_tf():
     print(tf2robot @ p_al)
     return tf2robot 
 
+from IPython.display import clear_output
+def process_data_from_AL(client,tf2robot):
+    #global tag,state,device_position_r,velocity,lock
+    print("thread has started")
+    while True :         
+        incoming_message = client.recv(1024).decode("utf-8") #Collect data from port and decode into  string
+        data_start_ix = incoming_message.find("[")
+        data_end_ix = incoming_message.find("]")
+        data_found = (data_start_ix != -1) and (data_end_ix != -1) and (data_start_ix < data_end_ix)
+
+        while(not data_found):
+            incoming_message = client.recv(1024).decode("utf-8") #Collect data from port and decode into  string
+            data_start_ix = incoming_message.find("[")
+            data_end_ix = incoming_message.find("]")
+            data_found = (data_start_ix != -1) and (data_end_ix != -1) and (data_start_ix < data_end_ix)
+        
+        incoming_message = incoming_message[data_start_ix+1 : data_end_ix] 
+        incoming_message = incoming_message.replace(',','.')
+        list_matrix = incoming_message.split(";")
+        state,position,velocity = (list_matrix[1],
+                                     np.fromstring(list_matrix[2], dtype=np.float,sep =" "),
+                                     np.fromstring(list_matrix[3], dtype=np.float,sep =" "))
+        #swap_z 
+
+        position[2] *= -1 
+        position_al = np.hstack((position,1))
+        al_xyz_in_r = tf2robot @ position_al
+        return state,position,velocity,al_xyz_in_r
+
+def check_al_in_robot_coordinates(robot,socket,client,tf2robot):
+    try:
+        while True:
+            state,position,velocity,al_xyz_in_r = process_data_from_AL(client,tf2robot)
+            
+            print("al in robot cs" ,al_xyz_in_r)
+            clear_output(wait=True)
+    except:
+        client.shutdown(socket.SHUT_RDWR)
+        socket.close()
+        
 #def append_data_to_file(filename):
     
