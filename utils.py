@@ -11,9 +11,10 @@ import serial.tools.list_ports
 import sys
 import numpy as np
 
-def initialize_hap(port = "COM4",baudrate=115200, timeout=0.1):
+def initialize_hap(port = "COM3",baudrate=115200, timeout=0.1):
     try:
         hap = serial.Serial(port = port, baudrate=baudrate, timeout = timeout)
+        print("hap is connected")
         return hap
     except serial.SerialException:
        # hap = serial.Serial(port, baudrate, timeout)
@@ -44,20 +45,90 @@ def list_available_com_ports():
         except (OSError, serial.SerialException):
             pass
     print("Availible COM Ports: " + str(result))
-    
-def hap_action(hap):
-    x1=20
+
+import serial
+
+def debug_hap():
+
+    #x1=173
+
+    x1=10
     y1=-14
     v1 = 0
-    v2 = 0
+    v2 = 0#100
     x3= 100
     y3= 0
-    c = 0
+    c=0
+    try:
+        s = serial.Serial('COM3', baudrate=115200, write_timeout=3.0,timeout=0.1)
+    except Exception as e:
+        print(e)
+        s = serial.Serial('COM4', baudrate=115200, write_timeout=3.0,timeout=0.1)
+        s.close()
 
-    while (c < 30):
+        pass
+        # print str(message_bytes)
+    try:
+        while c<50:
+            print(x1)
+            c+=2
+            s.write(bytes(str(x1) + "," + str(y1)+ "," + str(v1)+ "," + str(v2)+ "," + str(x3)+ "," + str(y3)+ "\n",'utf-8'))
+            time.sleep(0.18)
+            x1+=2
+
+        x1=35
+        y1=10
+        x2=0
+        y2=0
+        x3= 0
+        y3= 0
+
+        s.write(bytes(str(x1) + "," + str(y1)+ "," + str(x2)+ "," + str(y2)+ "," + str(x3)+ "," + str(y3)+ "\n",'utf-8'))
+        print(str(x1) + "," + str(y1)+ "," + str(x2)+ "," + str(y2)+ "," + str(x3)+ "," + str(y3)+ "\n")
+
+        s.close()
+    except Exception as e:
+        print(e)
+        s.close()
+
+def vib_hap_action(hap, vib1 = 100,vib2 = 100):
+    x1= 35
+    y1= 10
+    x2= 0
+    y2= 0
+    x3= 0
+    y3= 0
+
+    c = 0
+    while (c < 13):
         c += 2
-        hap.write(bytes(str(x1) + "," + str(y1)+ "," + str(v1)+ "," + str(v2)+ "," + str(x3)+ "," + str(y3)+ "\n",'utf-8'))
-        time.sleep(0.1)
+ #       x1 += 4
+        hap.write(bytes(str(x1) + "," + str(y1)+ "," + str(vib1)+ "," + str(vib2)+ "," + str(x3)+ "," + str(y3)+ "\n",'utf-8'))
+        time.sleep(0.2)
+
+    x1= 35
+    y1= 10
+    x2= 0
+    y2= 0
+    x3= 0
+    y3= 0
+
+    hap.write(bytes(str(x1) + "," + str(y1)+ "," + str(x2)+ "," + str(y2)+ "," + str(x3)+ "," + str(y3)+ "\n",'utf-8'))
+    print("hap function executed")
+        
+def hap_action(hap):
+    x1= 20
+    y1=-13
+    x3= 100
+    vib1 = 0
+    vib2 = 0
+    y3= 0
+    c = 0
+    while (c < 15):
+        c += 2
+        x1 += 4
+        hap.write(bytes(str(x1) + "," + str(y1)+ "," + str(vib1)+ "," + str(vib2)+ "," + str(x3)+ "," + str(y3)+ "\n",'utf-8'))
+        time.sleep(0.2)
 
     x1= 35
     y1= 10
@@ -81,7 +152,7 @@ def initialize_al(port = 20,bind_ip = '127.0.0.1',backlog = 5):
         print('socket listensing ... ')
     
         c, addr = s.accept() #when port connected
-        return c, addr
+        return s, c, addr 
     except:  
         print('interrupted ')
         s.close()
