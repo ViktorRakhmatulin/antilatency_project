@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/Antilatency/Integration/Samples/BracerSample.unity
+  isLoaded: 1
+  isActive: 1
